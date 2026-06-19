@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="JASIC V2 台股戰情中心，提供每日短期買賣觀察、自選股戰情分析與手機本機保存。">
+  <meta name="theme-color" content="#07553f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="JASIC V2">
+  <title>JASIC V2 台股戰情中心</title>
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/jasic-v2-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/jasic-v2-180.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 72 72" role="img" aria-label="JASIC 金元寶">
+        <rect width="72" height="72" rx="12" fill="#07553f"></rect>
+        <path d="M15 25c5 3 10 4 21 4s16-1 21-4l-6 19c-2 7-8 10-15 10s-13-3-15-10z" fill="#d79b12" stroke="#ffe29a" stroke-width="2"></path>
+        <ellipse cx="36" cy="29" rx="13" ry="8" fill="#ffd45c" stroke="#fff0b5" stroke-width="2"></ellipse>
+        <path d="M20 27c-5-1-7-4-9-7 7 0 11-2 15-6l3 14M52 27c5-1 7-4 9-7-7 0-11-2-15-6l-3 14" fill="#f1b72e" stroke="#ffe29a" stroke-width="2" stroke-linejoin="round"></path>
+        <text x="36" y="66" text-anchor="middle" fill="#fff5c9" font-size="10" font-weight="800" font-family="Arial, sans-serif">JASIC</text>
+      </svg>
+      <div>
+        <h1>JASIC V2 台股戰情中心</h1>
+        <p>每日短線雷達 × 自選股戰情分析</p>
+      </div>
+    </div>
+    <div class="update-area">
+      <span id="updateStatus" class="update-status">準備載入證交所資料</span>
+      <button id="installBtn" class="install-button" type="button" hidden>安裝 App</button>
+      <button id="refreshBtn" class="icon-button" type="button" title="更新全部資料" aria-label="更新全部資料">
+        <span aria-hidden="true">↻</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="app-shell">
+    <nav class="feature-launcher" aria-label="V2 功能入口">
+      <button class="feature-button recommendation-button" type="button" data-scroll-target="recommendationSection">
+        <span class="feature-number">01</span>
+        <span>
+          <strong>短期買賣建議區</strong>
+          <small>每日動態篩選 10／20 檔股票</small>
+        </span>
+        <b aria-hidden="true">→</b>
+      </button>
+      <button class="feature-button battle-button" type="button" data-scroll-target="battleSection">
+        <span class="feature-number">02</span>
+        <span>
+          <strong>自選股戰情分析</strong>
+          <small>新增、刪除並保存在這支手機</small>
+        </span>
+        <b aria-hidden="true">→</b>
+      </button>
+    </nav>
+
+    <section class="market-overview" aria-labelledby="marketOverviewTitle">
+      <div class="section-heading market-heading">
+        <div>
+          <span class="eyebrow">大盤速覽</span>
+          <h2 id="marketOverviewTitle">臺股現貨與期貨夜盤</h2>
+        </div>
+        <span id="marketQuoteTime" class="market-quote-time">行情載入中…</span>
+      </div>
+      <div class="market-grid">
+        <article class="market-card">
+          <div class="market-card-heading">
+            <div>
+              <span class="market-source">證交所現貨指數</span>
+              <h3>臺灣加權指數</h3>
+            </div>
+            <span class="market-badge spot-badge">現貨</span>
+          </div>
+          <strong id="taiexPrice" class="market-price">--</strong>
+          <span id="taiexChange" class="market-change">等待證交所報價</span>
+          <div class="market-range">
+            <span>高 <b id="taiexHigh">--</b></span>
+            <span>低 <b id="taiexLow">--</b></span>
+          </div>
+        </article>
+        <article class="market-card futures-card">
+          <div class="market-card-heading">
+            <div>
+              <span class="market-source">期交所盤後交易</span>
+              <h3>臺指期夜盤</h3>
+            </div>
+            <span class="market-badge futures-badge">期貨</span>
+          </div>
+          <strong id="taifexNightPrice" class="market-price">--</strong>
+          <span id="taifexNightChange" class="market-change">等待近月合約報價</span>
+          <div class="market-range">
+            <span>高 <b id="taifexNightHigh">--</b></span>
+            <span>低 <b id="taifexNightLow">--</b></span>
+          </div>
+          <p class="futures-note"><strong>近月合約</strong>・此為期貨點位，不是臺灣加權現貨指數。</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="recommendationSection" class="recommendation-section" aria-labelledby="recommendationTitle">
+      <div class="section-heading recommendation-heading">
+        <div>
+          <span class="eyebrow">JASIC 每日短線雷達</span>
+          <h2 id="recommendationTitle">短期買賣建議區</h2>
+          <p>依最新交易日的漲跌幅、成交量、價格位置與波動風險進行量化排序。</p>
+        </div>
+        <div class="recommendation-controls" role="group" aria-label="建議清單顯示數量">
+          <button type="button" class="count-toggle is-active" data-recommendation-count="10" aria-pressed="true">10 檔</button>
+          <button type="button" class="count-toggle" data-recommendation-count="20" aria-pressed="false">20 檔</button>
+        </div>
+      </div>
+      <div class="recommendation-meta">
+        <span id="recommendationDate">等待最新交易資料</span>
+        <span>清單每日隨證交所資料更新</span>
+      </div>
+      <div id="recommendationLoading" class="recommendation-loading">
+        <span class="spinner" aria-hidden="true"></span>
+        <span>正在掃描市場強弱…</span>
+      </div>
+      <div id="recommendationBoard" class="recommendation-board" hidden></div>
+    </section>
+
+    <section id="battleSection" class="battle-hub" aria-labelledby="battleHubTitle">
+      <div class="battle-hub-heading">
+        <div>
+          <span class="eyebrow">個人化戰情室</span>
+          <h2 id="battleHubTitle">自選股戰情分析</h2>
+          <p>輸入股票後產生 JASIC 戰情卡，清單會保存在目前手機或瀏覽器。</p>
+        </div>
+        <div class="local-save-badge">
+          <span aria-hidden="true">●</span>
+          本機保存
+        </div>
+      </div>
+    </section>
+
+    <section class="search-section" aria-labelledby="searchTitle">
+      <div>
+        <span class="eyebrow">新增自選股</span>
+        <h2 id="searchTitle">輸入股票名稱或代號</h2>
+        <p>支援臺灣證券交易所上市股票；最多保存 20 檔個人戰情卡。</p>
+      </div>
+      <form id="stockSearchForm" class="stock-search" autocomplete="off">
+        <div class="search-box">
+          <span class="search-icon" aria-hidden="true">⌕</span>
+          <input id="stockSearchInput" type="search" placeholder="例如：台積電、2330" aria-label="股票名稱或代號">
+          <button id="clearSearchBtn" class="clear-button" type="button" aria-label="清除搜尋" hidden>×</button>
+        </div>
+        <button id="searchSubmitBtn" type="submit">搜尋</button>
+        <div id="searchResults" class="search-results" role="listbox" hidden></div>
+      </form>
+    </section>
+
+    <section class="signal-summary" aria-label="自選股戰情摘要">
+      <article class="summary-item buy-summary">
+        <span class="summary-dot"></span>
+        <div><strong id="buyCount">0</strong><span>買進觀察</span></div>
+      </article>
+      <article class="summary-item hold-summary">
+        <span class="summary-dot"></span>
+        <div><strong id="holdCount">0</strong><span>可持有</span></div>
+      </article>
+      <article class="summary-item sell-summary">
+        <span class="summary-dot"></span>
+        <div><strong id="sellCount">0</strong><span>拋售警示</span></div>
+      </article>
+      <div class="legend-note">
+        戰情由均線、RSI、動能、量能與風險區間綜合判讀
+      </div>
+    </section>
+
+    <section class="watch-section" aria-labelledby="watchTitle">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">我的戰情清單</span>
+          <h2 id="watchTitle">自選股戰情看板</h2>
+        </div>
+        <select id="signalFilter" aria-label="篩選觀測訊號">
+          <option value="all">全部訊號</option>
+          <option value="buy">買進觀察</option>
+          <option value="hold">可持有</option>
+          <option value="sell">拋售警示</option>
+        </select>
+      </div>
+
+      <div id="loadingState" class="loading-state" hidden>
+        <span class="spinner" aria-hidden="true"></span>
+        <p>正在整理行情與技術指標…</p>
+      </div>
+
+      <div id="stockBoard" class="stock-board"></div>
+
+      <div id="emptyState" class="empty-state">
+        <div class="empty-icon" aria-hidden="true">＋</div>
+        <h3>建立第一筆觀察</h3>
+        <p>在上方輸入股票名稱或代號，系統會自動抓取資料並產生觀測訊號。</p>
+        <div class="quick-picks">
+          <button type="button" data-quick-symbol="2327">國巨 2327</button>
+          <button type="button" data-quick-symbol="2408">南亞科 2408</button>
+          <button type="button" data-quick-symbol="2303">聯電 2303</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="learn-section" aria-labelledby="learnTitle">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">快速入門</span>
+          <h2 id="learnTitle">看板上的指標是什麼？</h2>
+        </div>
+      </div>
+      <div class="learn-grid">
+        <article>
+          <span class="learn-tag">趨勢</span>
+          <h3>MA5 / MA20 均線</h3>
+          <p>MA5 是近 5 個交易日平均價格，MA20 約代表一個月趨勢。短均線站上長均線通常表示近期走勢轉強。</p>
+        </article>
+        <article>
+          <span class="learn-tag">強弱</span>
+          <h3>RSI 14</h3>
+          <p>RSI 衡量漲跌力道。50 以上偏強；70 以上可能過熱；30 以下可能超賣，但都不代表價格一定立即反轉。</p>
+        </article>
+        <article>
+          <span class="learn-tag">動能</span>
+          <h3>20 日漲跌</h3>
+          <p>比較目前價格和 20 個交易日前的差異，用來觀察中短期方向。正值是上漲動能，負值代表近期承壓。</p>
+        </article>
+        <article>
+          <span class="learn-tag">量價</span>
+          <h3>成交量比</h3>
+          <p>近 5 日均量與 20 日均量的比值。大於 1 代表近期量能放大，仍須配合價格方向判斷買盤或賣壓。</p>
+        </article>
+      </div>
+    </section>
+
+    <p class="disclaimer">
+      本工具使用臺灣證券交易所與臺灣期貨交易所公開資料，僅供學習與建立觀察紀律，不構成投資建議。臺指期夜盤為近月期貨合約，並非臺灣加權現貨指數；訊號是歷史價格的簡化判讀，不保證未來績效。
+    </p>
+  </main>
+
+  <template id="stockCardTemplate">
+    <article class="stock-card">
+      <div class="stock-card-main">
+        <div class="stock-identity">
+          <button class="remove-button" type="button" title="移除觀察" aria-label="移除觀察">×</button>
+          <span class="stock-code"></span>
+          <h3 class="stock-name"></h3>
+          <span class="data-date"></span>
+        </div>
+        <div class="price-comparison">
+          <div class="previous-price-block">
+            <span class="price-label">昨日收盤</span>
+            <strong class="previous-close"></strong>
+            <span class="previous-date"></span>
+          </div>
+          <div class="current-price-block">
+            <span class="price-label current-price-label">今日盤價</span>
+            <strong class="stock-price"></strong>
+            <span class="stock-change"></span>
+            <span class="quote-update-time"></span>
+          </div>
+        </div>
+        <div class="signal-block">
+          <span class="signal-label"></span>
+          <strong class="signal-title"></strong>
+          <span class="signal-score"></span>
+        </div>
+        <div class="indicator-strip">
+          <div><span>MA5</span><strong class="ma5-value"></strong></div>
+          <div><span>MA20</span><strong class="ma20-value"></strong></div>
+          <div><span>RSI 14</span><strong class="rsi-value"></strong></div>
+          <div><span>20 日</span><strong class="momentum-value"></strong></div>
+        </div>
+        <button class="details-button" type="button" aria-expanded="false">
+          <span>展開完整戰情</span><b aria-hidden="true">⌄</b>
+        </button>
+      </div>
+      <div class="stock-details" hidden>
+        <div class="reason-list"></div>
+        <div class="indicator-lessons"></div>
+        <div class="battle-plan">
+          <div><span>短線趨勢</span><strong class="trend-value"></strong></div>
+          <div><span>參考支撐</span><strong class="support-value"></strong></div>
+          <div><span>風險防守</span><strong class="stop-value"></strong></div>
+          <div><span>觀察目標</span><strong class="target-value"></strong></div>
+        </div>
+        <div class="value-strip">
+          <span>本益比 <strong class="pe-value"></strong></span>
+          <span>殖利率 <strong class="yield-value"></strong></span>
+          <span>近 5/20 日量比 <strong class="volume-ratio-value"></strong></span>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <script src="app.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js"));
+    }
+  </script>
+</body>
+</html>

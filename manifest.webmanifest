@@ -1,0 +1,32 @@
+{
+  "name": "JASIC V2 台股戰情中心",
+  "short_name": "JASIC V2",
+  "description": "每日短期買賣觀察、自選股戰情分析與手機本機保存",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f3f6f4",
+  "theme_color": "#07553f",
+  "icons": [
+    {
+      "src": "assets/jasic-v2-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/jasic-v2-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/jasic-v2-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
