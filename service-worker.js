@@ -1,10 +1,11 @@
-const CACHE_NAME = "jasic-v2-shell-20260619-icon2";
+const CACHE_NAME = "jasic-v2-shell-20260619-sprint1";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
   "./manifest.webmanifest",
+  "./data/hot-sprint.json",
   "./assets/jasic-v2-180.png",
   "./assets/jasic-v2-192.png",
   "./assets/jasic-v2-512.png"

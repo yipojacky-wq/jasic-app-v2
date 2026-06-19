@@ -56,6 +56,14 @@
         </span>
         <b aria-hidden="true">→</b>
       </button>
+      <button class="feature-button sprint-button" type="button" data-scroll-target="sprintSection">
+        <span class="feature-number">03</span>
+        <span>
+          <strong>熱門衝刺建議區</strong>
+          <small>外資目標價差排行 × JASIC 戰情</small>
+        </span>
+        <b aria-hidden="true">→</b>
+      </button>
     </nav>
 
     <section class="market-overview" aria-labelledby="marketOverviewTitle">
@@ -122,6 +130,29 @@
         <span>正在掃描市場強弱…</span>
       </div>
       <div id="recommendationBoard" class="recommendation-board" hidden></div>
+    </section>
+
+    <section id="sprintSection" class="sprint-section" aria-labelledby="sprintTitle">
+      <div class="section-heading sprint-heading">
+        <div>
+          <span class="eyebrow">外資目標價追蹤</span>
+          <h2 id="sprintTitle">熱門衝刺建議區</h2>
+          <p>彙整可追溯的外資／券商目標價消息，只顯示目標價高於最新股價至少 100 元的股票，依潛在價差排序前十名。</p>
+        </div>
+        <span id="sprintFreshness" class="freshness-badge">載入消息資料中…</span>
+      </div>
+      <div class="sprint-warning">
+        <strong>重要提示</strong>
+        目標價是研究機構估值，不是保證到價。價差越大也可能代表波動、估值或消息落差越高，請搭配右側 JASIC 戰情與風險提示判斷。
+      </div>
+      <div id="sprintLoading" class="recommendation-loading">
+        <span class="spinner" aria-hidden="true"></span>
+        <span>正在比對最新股價與外資目標價…</span>
+      </div>
+      <div id="sprintBoard" class="sprint-board" hidden></div>
+      <p class="sprint-method">
+        排序方式：外資目標價 − 證交所最新股價。新聞來源與發布日期列於每張卡片，逾 30 天資料會標示過期。
+      </p>
     </section>
 
     <section id="battleSection" class="battle-hub" aria-labelledby="battleHubTitle">

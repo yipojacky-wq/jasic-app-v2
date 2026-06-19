@@ -3,6 +3,7 @@ const TWSE_HISTORY_URL = "https://www.twse.com.tw/exchangeReport/STOCK_DAY";
 const TWSE_VALUE_URL = "https://www.twse.com.tw/rwd/zh/afterTrading/BWIBBU_d";
 const WORKER_QUOTES_URL = "https://jasic-quotes.yipo-jacky.workers.dev/quotes";
 const STATIC_QUOTES_URL = "https://yipojacky-wq.github.io/Jacky/data/realtime-quotes.json";
+const HOT_SPRINT_URL = "./data/hot-sprint.json";
 const STORAGE_KEY = "jasic-v2-battle-watchlist";
 const MAX_WATCH_SYMBOLS = 20;
 const AUTO_REFRESH_MS = 5 * 60 * 1000;
@@ -21,6 +22,8 @@ const state = {
   watchSymbols: loadWatchSymbols(),
   stocks: [],
   recommendations: { buy: [], sell: [] },
+  sprintFeed: { updatedAt: "", items: [] },
+  sprintRanking: [],
   recommendationCount: 10,
   filter: "all",
   loading: false,
@@ -46,6 +49,12 @@ const recommendationElements = {
   loading: document.querySelector("#recommendationLoading"),
   date: document.querySelector("#recommendationDate"),
   toggles: document.querySelectorAll("[data-recommendation-count]")
+};
+
+const sprintElements = {
+  board: document.querySelector("#sprintBoard"),
+  loading: document.querySelector("#sprintLoading"),
+  freshness: document.querySelector("#sprintFreshness")
 };
 
 let deferredInstallPrompt = null;
@@ -142,6 +151,79 @@ async function loadMarketCatalog() {
 
   await loadValuations(payload.date);
   buildDailyRecommendations();
+  await loadHotSprint();
+}
+
+async function loadHotSprint() {
+  try {
+    const payload = await fetchJson(`${HOT_SPRINT_URL}?t=${Date.now()}`);
+    state.sprintFeed = {
+      updatedAt: payload.updatedAt || "",
+      items: Array.isArray(payload.items) ? payload.items : []
+    };
+    buildSprintRanking();
+  } catch {
+    state.sprintFeed = { updatedAt: "", items: [] };
+    state.sprintRanking = [];
+  }
+}
+
+function buildSprintRanking() {
+  state.sprintRanking = state.sprintFeed.items
+    .map((item) => {
+      const market = state.catalog.find((stock) => stock.symbol === item.symbol);
+      if (!market || !Number.isFinite(market.close) || !Number.isFinite(item.targetPrice)) return null;
+      const gap = item.targetPrice - market.close;
+      const upsidePercent = market.close > 0 ? (gap / market.close) * 100 : null;
+      const battle = getSprintBattle(market);
+      const ageDays = getAgeDays(item.publishedAt);
+      return { ...item, market, gap, upsidePercent, battle, ageDays };
+    })
+    .filter((item) => item && item.gap >= 100)
+    .sort((a, b) => b.gap - a.gap)
+    .slice(0, 10);
+}
+
+function getAgeDays(dateString) {
+  const date = new Date(`${dateString}T00:00:00+08:00`);
+  if (Number.isNaN(date.getTime())) return null;
+  return Math.max(0, Math.floor((Date.now() - date.getTime()) / 86400000));
+}
+
+function getSprintBattle(stock) {
+  const previousClose = Number.isFinite(stock.change) ? stock.close - stock.change : null;
+  const changePercent = Number.isFinite(previousClose) && previousClose > 0
+    ? (stock.change / previousClose) * 100
+    : 0;
+  const rangePercent = Number.isFinite(stock.high) && Number.isFinite(stock.low) && stock.low > 0
+    ? ((stock.high - stock.low) / stock.low) * 100
+    : 0;
+  const closePosition = Number.isFinite(stock.high) && Number.isFinite(stock.low) && stock.high !== stock.low
+    ? (stock.close - stock.low) / (stock.high - stock.low)
+    : 0.5;
+
+  if (changePercent >= 4 && closePosition >= 0.7) {
+    return {
+      key: "attack",
+      title: "多方衝刺",
+      brief: `漲幅 ${formatPercent(changePercent)}，收盤接近當日高檔，動能強但不宜追價。`,
+      risk: rangePercent >= 8 ? "波動很高" : "波動偏高"
+    };
+  }
+  if (changePercent > 0) {
+    return {
+      key: "watch",
+      title: "偏多觀察",
+      brief: `當日維持上漲 ${formatPercent(changePercent)}，宜等量價續強或拉回確認。`,
+      risk: rangePercent >= 6 ? "震盪偏大" : "中度波動"
+    };
+  }
+  return {
+    key: "risk",
+    title: "消息強、盤勢弱",
+    brief: `目標價具想像空間，但當日股價 ${formatPercent(changePercent)}，先觀察止跌訊號。`,
+    risk: rangePercent >= 6 ? "高風險" : "轉弱警戒"
+  };
 }
 
 function buildDailyRecommendations() {
@@ -611,6 +693,7 @@ function render() {
   elements.board.hidden = !hasAny;
   renderMarketOverview();
   renderRecommendations();
+  renderSprint();
   renderSummary();
 }
 
@@ -682,6 +765,65 @@ function formatCompactNumber(value) {
   if (value >= 100000000) return `${(value / 100000000).toFixed(1)} 億`;
   if (value >= 10000) return `${(value / 10000).toFixed(1)} 萬`;
   return value.toLocaleString("zh-TW");
+}
+
+function renderSprint() {
+  sprintElements.board.innerHTML = "";
+  const updatedAt = state.sprintFeed.updatedAt ? new Date(state.sprintFeed.updatedAt) : null;
+  const updatedLabel = updatedAt && !Number.isNaN(updatedAt.getTime())
+    ? updatedAt.toLocaleString("zh-TW", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false })
+    : "來源資料待更新";
+  const staleCount = state.sprintRanking.filter((item) => Number.isFinite(item.ageDays) && item.ageDays > 30).length;
+  sprintElements.freshness.textContent = staleCount
+    ? `${updatedLabel}・${staleCount} 筆逾 30 天`
+    : `${updatedLabel}・來源可追溯`;
+  sprintElements.freshness.classList.toggle("is-stale", staleCount > 0);
+
+  state.sprintRanking.forEach((item, index) => {
+    const card = document.createElement("article");
+    card.className = `sprint-card sprint-${item.battle.key}`;
+    card.dataset.symbol = item.symbol;
+    const staleLabel = Number.isFinite(item.ageDays) && item.ageDays > 30
+      ? '<span class="source-age is-stale">消息逾 30 天</span>'
+      : `<span class="source-age">${item.ageDays ?? "--"} 天前</span>`;
+    card.innerHTML = `
+      <div class="sprint-rank">${String(index + 1).padStart(2, "0")}</div>
+      <div class="sprint-stock">
+        <span>${escapeHtml(item.symbol)}・${escapeHtml(item.institution)}</span>
+        <h3>${escapeHtml(item.name)}</h3>
+        <div class="sprint-prices">
+          <span>最新股價 <strong>${formatPrice(item.market.close)}</strong></span>
+          <span>外資目標 <strong>${formatPrice(item.targetPrice)}</strong></span>
+          <span class="sprint-gap">價差 <strong>+${formatPrice(item.gap)}</strong></span>
+        </div>
+        <div class="sprint-upside">目標價潛在空間 ${formatPercent(item.upsidePercent)}</div>
+      </div>
+      <div class="sprint-battle">
+        <span class="battle-kicker">JASIC 戰情簡報</span>
+        <strong>${escapeHtml(item.battle.title)}</strong>
+        <p>${escapeHtml(item.battle.brief)}</p>
+        <span class="battle-risk">風險：${escapeHtml(item.battle.risk)}</span>
+      </div>
+      <div class="sprint-source">
+        ${staleLabel}
+        <time datetime="${escapeHtml(item.publishedAt)}">${escapeHtml(item.publishedAt)}</time>
+        <a href="${escapeHtml(item.sourceUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.sourceTitle)}</a>
+        <button type="button" data-add-sprint-symbol="${escapeHtml(item.symbol)}">加入自選戰情</button>
+      </div>
+    `;
+    sprintElements.board.append(card);
+  });
+
+  if (!state.sprintRanking.length) {
+    sprintElements.board.innerHTML = `
+      <div class="sprint-empty">
+        目前沒有符合「目標價高於最新股價至少 100 元」且具有可追溯來源的資料。
+      </div>
+    `;
+  }
+
+  sprintElements.loading.hidden = true;
+  sprintElements.board.hidden = false;
 }
 
 function renderMarketOverview() {
@@ -951,6 +1093,11 @@ document.querySelectorAll("[data-scroll-target]").forEach((button) => {
       block: "start"
     });
   });
+});
+
+sprintElements.board.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-add-sprint-symbol]");
+  if (button) addStock(button.dataset.addSprintSymbol);
 });
 
 document.addEventListener("click", (event) => {

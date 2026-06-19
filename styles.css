@@ -147,7 +147,7 @@ p {
 
 .feature-launcher {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
   margin-bottom: 1.2rem;
 }
@@ -179,6 +179,11 @@ p {
 .battle-button {
   color: #2d2208;
   background: linear-gradient(135deg, #f6c94f, #e5a91a);
+}
+
+.sprint-button {
+  color: #fff;
+  background: linear-gradient(135deg, #8024a8, #d44175);
 }
 
 .feature-number {
@@ -233,6 +238,234 @@ p {
   border-radius: 10px;
   background: var(--surface);
   box-shadow: var(--shadow);
+}
+
+.sprint-section {
+  scroll-margin-top: 6.5rem;
+  margin-bottom: 1.2rem;
+  padding: 1.5rem;
+  border: 1px solid #e4d8e8;
+  border-radius: 10px;
+  background: linear-gradient(145deg, #fff 0%, #fcf7ff 100%);
+  box-shadow: var(--shadow);
+}
+
+.sprint-heading {
+  align-items: start;
+}
+
+.sprint-heading p {
+  max-width: 49rem;
+  margin-top: 0.55rem;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.freshness-badge {
+  flex: 0 0 auto;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid #c8ead7;
+  border-radius: 999px;
+  color: var(--buy);
+  background: var(--buy-soft);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.freshness-badge.is-stale {
+  border-color: #f0cf91;
+  color: #8a5700;
+  background: var(--hold-soft);
+}
+
+.sprint-warning {
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+  border-left: 4px solid #d44175;
+  border-radius: 7px;
+  color: #5c3150;
+  background: #fff0f6;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.sprint-warning strong {
+  margin-right: 0.35rem;
+}
+
+.sprint-board {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.sprint-card {
+  display: grid;
+  grid-template-columns: auto minmax(14rem, 1fr) minmax(15rem, 1fr) minmax(15rem, 0.9fr);
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--hold);
+  border-radius: 9px;
+  background: #fff;
+}
+
+.sprint-card.sprint-attack {
+  border-left-color: #d44175;
+}
+
+.sprint-card.sprint-watch {
+  border-left-color: var(--buy);
+}
+
+.sprint-card.sprint-risk {
+  border-left-color: var(--sell);
+}
+
+.sprint-rank {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 8px;
+  color: #7b2764;
+  background: #f9e8f3;
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.sprint-stock > span {
+  color: var(--muted);
+  font-size: 0.73rem;
+}
+
+.sprint-stock h3 {
+  margin-top: 0.15rem;
+  font-size: 1.08rem;
+}
+
+.sprint-prices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.6rem;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.sprint-prices strong {
+  color: var(--ink);
+}
+
+.sprint-prices .sprint-gap strong {
+  color: #bd2361;
+}
+
+.sprint-upside {
+  margin-top: 0.35rem;
+  color: #8b2259;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.sprint-battle {
+  padding: 0.75rem;
+  border-radius: 7px;
+  background: var(--surface-soft);
+}
+
+.battle-kicker {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: var(--accent);
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.sprint-battle > strong {
+  font-size: 0.94rem;
+}
+
+.sprint-battle p {
+  margin-top: 0.35rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.battle-risk {
+  display: inline-block;
+  margin-top: 0.45rem;
+  color: var(--sell);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.sprint-source {
+  display: grid;
+  gap: 0.35rem;
+  align-items: start;
+}
+
+.source-age {
+  width: max-content;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  color: var(--buy);
+  background: var(--buy-soft);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.source-age.is-stale {
+  color: #8a5700;
+  background: var(--hold-soft);
+}
+
+.sprint-source time {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.sprint-source a {
+  color: var(--accent);
+  font-size: 0.77rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.sprint-source button {
+  width: max-content;
+  margin-top: 0.25rem;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  color: var(--accent);
+  background: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.sprint-source button:hover {
+  color: #fff;
+  background: var(--accent);
+}
+
+.sprint-method,
+.sprint-empty {
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.55;
+}
+
+.sprint-method {
+  margin-top: 0.85rem;
+  text-align: center;
+}
+
+.sprint-empty {
+  padding: 2rem 1rem;
+  text-align: center;
 }
 
 .recommendation-heading {
@@ -1229,12 +1462,42 @@ p {
   .learn-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .feature-launcher {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .sprint-card {
+    grid-template-columns: auto minmax(0, 1fr) minmax(14rem, 1fr);
+  }
+
+  .sprint-source {
+    grid-column: 2 / -1;
+  }
 }
 
 @media (max-width: 700px) {
   .feature-launcher,
   .recommendation-board {
     grid-template-columns: 1fr;
+  }
+
+  .sprint-heading {
+    display: grid;
+  }
+
+  .freshness-badge {
+    width: max-content;
+  }
+
+  .sprint-card {
+    grid-template-columns: auto 1fr;
+    align-items: start;
+  }
+
+  .sprint-battle,
+  .sprint-source {
+    grid-column: 2;
   }
 
   .feature-button {
@@ -1363,6 +1626,10 @@ p {
   }
 
   .recommendation-section {
+    padding: 1rem;
+  }
+
+  .sprint-section {
     padding: 1rem;
   }
 
