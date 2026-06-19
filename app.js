@@ -1138,6 +1138,18 @@ document.querySelectorAll("[data-scroll-target]").forEach((button) => {
   });
 });
 
+const backToTopButton = document.querySelector("#backToTopBtn");
+
+function updateBackToTopVisibility() {
+  backToTopButton.hidden = window.scrollY < 500;
+}
+
+window.addEventListener("scroll", updateBackToTopVisibility, { passive: true });
+backToTopButton.addEventListener("click", () => {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+updateBackToTopVisibility();
+
 sprintElements.board.addEventListener("click", (event) => {
   const button = event.target.closest("[data-add-sprint-symbol]");
   if (button) addStock(button.dataset.addSprintSymbol);

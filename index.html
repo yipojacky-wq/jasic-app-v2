@@ -109,9 +109,10 @@
       </div>
     </section>
 
-    <section id="recommendationSection" class="recommendation-section" aria-labelledby="recommendationTitle">
+    <section id="recommendationSection" class="recommendation-section feature-content feature-content-01" aria-labelledby="recommendationTitle">
       <div class="section-heading recommendation-heading">
         <div>
+          <span class="content-section-number">01</span>
           <span class="eyebrow">JASIC 每日短線雷達</span>
           <h2 id="recommendationTitle">短期買賣建議區</h2>
           <p>依最新交易日的漲跌幅、成交量、價格位置與波動風險進行量化排序。</p>
@@ -132,44 +133,23 @@
       <div id="recommendationBoard" class="recommendation-board" hidden></div>
     </section>
 
-    <section id="sprintSection" class="sprint-section" aria-labelledby="sprintTitle">
-      <div class="section-heading sprint-heading">
-        <div>
-          <span class="eyebrow">外資目標價追蹤</span>
-          <h2 id="sprintTitle">熱門衝刺建議區</h2>
-          <p>彙整可追溯的外資／券商目標價消息，只顯示目標價高於最新股價至少 100 元的股票，依潛在價差排序前十名。</p>
+    <div id="battleSection" class="feature-content feature-content-02" aria-labelledby="battleHubTitle">
+      <section class="battle-hub">
+        <div class="battle-hub-heading">
+          <div>
+            <span class="content-section-number">02</span>
+            <span class="eyebrow">個人化戰情室</span>
+            <h2 id="battleHubTitle">自選股戰情分析</h2>
+            <p>輸入股票後產生 JASIC 戰情卡，清單會保存在目前手機或瀏覽器。</p>
+          </div>
+          <div class="local-save-badge">
+            <span aria-hidden="true">●</span>
+            本機保存
+          </div>
         </div>
-        <span id="sprintFreshness" class="freshness-badge">載入消息資料中…</span>
-      </div>
-      <div class="sprint-warning">
-        <strong>重要提示</strong>
-        目標價是研究機構估值，不是保證到價。價差越大也可能代表波動、估值或消息落差越高，請搭配右側 JASIC 戰情與風險提示判斷。
-      </div>
-      <div id="sprintLoading" class="recommendation-loading">
-        <span class="spinner" aria-hidden="true"></span>
-        <span>正在比對最新股價與外資目標價…</span>
-      </div>
-      <div id="sprintBoard" class="sprint-board" hidden></div>
-      <p class="sprint-method">
-        排序方式：外資目標價 − 證交所最新股價。新聞來源與發布日期列於每張卡片，逾 30 天資料會標示過期。
-      </p>
-    </section>
+      </section>
 
-    <section id="battleSection" class="battle-hub" aria-labelledby="battleHubTitle">
-      <div class="battle-hub-heading">
-        <div>
-          <span class="eyebrow">個人化戰情室</span>
-          <h2 id="battleHubTitle">自選股戰情分析</h2>
-          <p>輸入股票後產生 JASIC 戰情卡，清單會保存在目前手機或瀏覽器。</p>
-        </div>
-        <div class="local-save-badge">
-          <span aria-hidden="true">●</span>
-          本機保存
-        </div>
-      </div>
-    </section>
-
-    <section class="search-section" aria-labelledby="searchTitle">
+      <section class="search-section" aria-labelledby="searchTitle">
       <div>
         <span class="eyebrow">新增自選股</span>
         <h2 id="searchTitle">輸入股票名稱或代號</h2>
@@ -184,9 +164,9 @@
         <button id="searchSubmitBtn" type="submit">搜尋</button>
         <div id="searchResults" class="search-results" role="listbox" hidden></div>
       </form>
-    </section>
+      </section>
 
-    <section class="signal-summary" aria-label="自選股戰情摘要">
+      <section class="signal-summary" aria-label="自選股戰情摘要">
       <article class="summary-item buy-summary">
         <span class="summary-dot"></span>
         <div><strong id="buyCount">0</strong><span>買進觀察</span></div>
@@ -202,9 +182,9 @@
       <div class="legend-note">
         戰情由均線、RSI、動能、量能與風險區間綜合判讀
       </div>
-    </section>
+      </section>
 
-    <section class="watch-section" aria-labelledby="watchTitle">
+      <section class="watch-section" aria-labelledby="watchTitle">
       <div class="section-heading">
         <div>
           <span class="eyebrow">我的戰情清單</span>
@@ -235,6 +215,31 @@
           <button type="button" data-quick-symbol="2303">聯電 2303</button>
         </div>
       </div>
+      </section>
+    </div>
+
+    <section id="sprintSection" class="sprint-section feature-content feature-content-03" aria-labelledby="sprintTitle">
+      <div class="section-heading sprint-heading">
+        <div>
+          <span class="content-section-number">03</span>
+          <span class="eyebrow">外資目標價追蹤</span>
+          <h2 id="sprintTitle">熱門衝刺建議區</h2>
+          <p>彙整可追溯的外資／券商目標價消息，只顯示目標價高於最新股價至少 100 元的股票，依潛在價差排序前十名。</p>
+        </div>
+        <span id="sprintFreshness" class="freshness-badge">載入消息資料中…</span>
+      </div>
+      <div class="sprint-warning">
+        <strong>重要提示</strong>
+        目標價是研究機構估值，不是保證到價。價差越大也可能代表波動、估值或消息落差越高，請搭配右側 JASIC 戰情與風險提示判斷。
+      </div>
+      <div id="sprintLoading" class="recommendation-loading">
+        <span class="spinner" aria-hidden="true"></span>
+        <span>正在比對最新股價與外資目標價…</span>
+      </div>
+      <div id="sprintBoard" class="sprint-board" hidden></div>
+      <p class="sprint-method">
+        排序方式：外資目標價 − 證交所最新股價。新聞來源與發布日期列於每張卡片，逾 30 天資料會標示過期。
+      </p>
     </section>
 
     <section class="learn-section" aria-labelledby="learnTitle">
@@ -272,6 +277,11 @@
       本工具使用臺灣證券交易所與臺灣期貨交易所公開資料，僅供學習與建立觀察紀律，不構成投資建議。臺指期夜盤為近月期貨合約，並非臺灣加權現貨指數；訊號是歷史價格的簡化判讀，不保證未來績效。
     </p>
   </main>
+
+  <button id="backToTopBtn" class="back-to-top" type="button" aria-label="返回頁面最上方" hidden>
+    <span aria-hidden="true">↑</span>
+    <strong>返回頂端</strong>
+  </button>
 
   <template id="stockCardTemplate">
     <article class="stock-card">
