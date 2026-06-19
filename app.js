@@ -944,6 +944,7 @@ function createStockCard(stock) {
   setText(card, ".support-value", formatPrice(getSupportPrice(stock)));
   setText(card, ".stop-value", formatPrice(getStopPrice(stock)));
   setText(card, ".target-value", formatPrice(getTargetPrice(stock)));
+  renderForeignTarget(card, stock);
 
   const reasonList = card.querySelector(".reason-list");
   stock.signal.reasons.forEach((reason) => {
@@ -973,6 +974,48 @@ function createStockCard(stock) {
   });
 
   return fragment;
+}
+
+function renderForeignTarget(card, stock) {
+  const target = getLatestTargetForSymbol(stock.symbol);
+  const block = card.querySelector(".foreign-target-block");
+  const price = block.querySelector(".foreign-target-price");
+  const upside = block.querySelector(".foreign-target-upside");
+  const link = block.querySelector(".foreign-target-link");
+  const searchLink = block.querySelector(".foreign-target-search");
+  searchLink.href = buildTargetSearchUrl(stock);
+
+  if (!target) {
+    block.classList.add("is-empty");
+    price.textContent = "目標價待查證";
+    upside.textContent = "目前資料庫尚無近期可靠報告，請使用下方網路檢索";
+    link.hidden = true;
+    searchLink.textContent = `檢索 ${stock.name} ${stock.symbol} 最新外資目標價`;
+    return;
+  }
+
+  const gap = target.targetPrice - stock.close;
+  const gapPercent = stock.close > 0 ? (gap / stock.close) * 100 : null;
+  const ageDays = getAgeDays(target.publishedAt);
+  price.textContent = `目標價 ${formatPrice(target.targetPrice)}`;
+  upside.textContent = `${target.institution}・${target.publishedAt}・相對現價 ${formatPercent(gapPercent)}`;
+  upside.classList.add(gap >= 0 ? "target-positive" : "target-negative");
+  if (Number.isFinite(ageDays) && ageDays > 30) block.classList.add("is-stale");
+  link.href = target.sourceUrl;
+  link.textContent = `查看新聞：${target.sourceTitle}`;
+  link.hidden = false;
+  searchLink.textContent = "再次同步檢索更多最新消息";
+}
+
+function getLatestTargetForSymbol(symbol) {
+  return state.sprintFeed.items
+    .filter((item) => item.symbol === symbol && Number.isFinite(item.targetPrice) && item.sourceUrl)
+    .sort((a, b) => String(b.publishedAt).localeCompare(String(a.publishedAt)))[0] || null;
+}
+
+function buildTargetSearchUrl(stock) {
+  const query = `${stock.name} ${stock.symbol} 外資 目標價 最新`;
+  return `https://www.google.com/search?tbm=nws&q=${encodeURIComponent(query)}`;
 }
 
 function getTrendLabel(stock) {

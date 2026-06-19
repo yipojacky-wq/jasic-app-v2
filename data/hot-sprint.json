@@ -120,6 +120,28 @@
       "referenceGap": 420
     },
     {
+      "symbol": "2408",
+      "name": "南亞科",
+      "targetPrice": 370,
+      "institution": "FactSet 分析師共識",
+      "publishedAt": "2026-06-19",
+      "sourceTitle": "FactSet 最新調查：南亞科 EPS 預估上修，目標價約 370 元",
+      "sourceUrl": "https://news.cnyes.com/news/id/6505644",
+      "referencePrice": 459.5,
+      "referenceGap": -89.5
+    },
+    {
+      "symbol": "2303",
+      "name": "聯電",
+      "targetPrice": 168,
+      "institution": "群益證券",
+      "publishedAt": "2026-06-15",
+      "sourceTitle": "聯電獲升評買進，法人給予 168 元目標價",
+      "sourceUrl": "https://wantrich.chinatimes.com/news/20260615900406-420101",
+      "referencePrice": 145.5,
+      "referenceGap": 22.5
+    },
+    {
       "symbol": "3008",
       "name": "大立光",
       "targetPrice": 5325,

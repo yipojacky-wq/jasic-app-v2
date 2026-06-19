@@ -1,4 +1,4 @@
-const CACHE_NAME = "jasic-v2-shell-20260619-sprint1";
+const CACHE_NAME = "jasic-v2-shell-20260619-target2";
 const APP_SHELL = [
   "./",
   "./index.html",
