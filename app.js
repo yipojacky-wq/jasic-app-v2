@@ -637,8 +637,8 @@ function setLoading(loading) {
   state.loading = loading;
   elements.refresh.classList.toggle("is-loading", loading);
   elements.refresh.disabled = loading;
-  elements.battleRefresh.disabled = loading;
-  sprintElements.refresh.disabled = loading;
+  if (elements.battleRefresh) elements.battleRefresh.disabled = loading;
+  if (sprintElements.refresh) sprintElements.refresh.disabled = loading;
   elements.loading.hidden = !loading || state.watchSymbols.length === 0;
   if (loading && state.watchSymbols.length > 0) elements.empty.hidden = true;
   recommendationElements.loading.hidden = !loading;
@@ -1164,8 +1164,8 @@ document.querySelector(".quick-picks").addEventListener("click", (event) => {
 });
 
 elements.refresh.addEventListener("click", () => refreshAll());
-elements.battleRefresh.addEventListener("click", () => refreshBattleSection());
-sprintElements.refresh.addEventListener("click", () => refreshSprintSection());
+elements.battleRefresh?.addEventListener("click", () => refreshBattleSection());
+sprintElements.refresh?.addEventListener("click", () => refreshSprintSection());
 
 elements.filter.addEventListener("change", () => {
   state.filter = elements.filter.value;
@@ -1196,11 +1196,12 @@ document.querySelectorAll("[data-scroll-target]").forEach((button) => {
 const backToTopButton = document.querySelector("#backToTopBtn");
 
 function updateBackToTopVisibility() {
+  if (!backToTopButton) return;
   backToTopButton.hidden = window.scrollY < 500;
 }
 
 window.addEventListener("scroll", updateBackToTopVisibility, { passive: true });
-backToTopButton.addEventListener("click", () => {
+backToTopButton?.addEventListener("click", () => {
   window.scrollTo({ top: 0, behavior: "smooth" });
 });
 updateBackToTopVisibility();

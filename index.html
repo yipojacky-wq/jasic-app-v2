@@ -354,7 +354,14 @@
   <script src="app.js"></script>
   <script>
     if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js"));
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (sessionStorage.getItem("jasic-v2-reloaded-for-update")) return;
+        sessionStorage.setItem("jasic-v2-reloaded-for-update", "1");
+        window.location.reload();
+      });
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js").then((registration) => registration.update());
+      });
     }
   </script>
 </body>
