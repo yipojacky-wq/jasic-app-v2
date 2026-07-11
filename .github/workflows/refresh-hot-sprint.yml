@@ -16,12 +16,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - name: Refresh TWSE market catalog
+        run: node scripts/refresh-market-catalog.mjs
       - name: Refresh TWSE reference prices
         run: node scripts/refresh-hot-sprint.mjs
       - name: Commit refreshed feed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/hot-sprint.json
+          git add data/hot-sprint.json data/market-catalog.json
           git diff --cached --quiet || git commit -m "chore: refresh hot sprint prices"
           git push

@@ -1,4 +1,4 @@
-const CACHE_NAME = "jasic-v2-shell-20260712-ios-fetch";
+const CACHE_NAME = "jasic-v2-shell-20260712-twse-csv-fallback";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -6,6 +6,7 @@ const APP_SHELL = [
   "./app.js",
   "./manifest.webmanifest",
   "./data/hot-sprint.json",
+  "./data/market-catalog.json",
   "./assets/jasic-v2-180.png",
   "./assets/jasic-v2-192.png",
   "./assets/jasic-v2-512.png"

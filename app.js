@@ -4,6 +4,7 @@ const TWSE_VALUE_URL = "https://www.twse.com.tw/rwd/zh/afterTrading/BWIBBU_d";
 const WORKER_QUOTES_URL = "https://jasic-quotes.yipo-jacky.workers.dev/quotes";
 const STATIC_QUOTES_URL = "https://yipojacky-wq.github.io/Jacky/data/realtime-quotes.json";
 const HOT_SPRINT_URL = "./data/hot-sprint.json";
+const MARKET_CATALOG_URL = "./data/market-catalog.json";
 const STORAGE_KEY = "jasic-v2-battle-watchlist";
 const MAX_WATCH_SYMBOLS = 20;
 const AUTO_REFRESH_MS = 5 * 60 * 1000;
@@ -134,14 +135,66 @@ function fetchJson(url) {
   });
 }
 
+function fetchText(url) {
+  return fetch(withCacheBust(url)).then((response) => {
+    if (!response.ok) throw new Error(`資料服務回應 ${response.status}`);
+    return response.text();
+  });
+}
+
 async function loadMarketCatalog() {
-  const payload = await fetchJson(TWSE_DAILY_URL);
-  if (payload.stat !== "OK" || !Array.isArray(payload.data)) {
-    throw new Error(payload.stat || "目前無法取得證交所行情");
+  let marketData;
+  try {
+    marketData = await loadTwseMarketCatalog();
+  } catch {
+    marketData = await loadFallbackMarketCatalog();
   }
 
-  state.latestDate = payload.date;
-  state.catalog = payload.data
+  state.latestDate = marketData.date;
+  state.catalog = marketData.stocks;
+
+  if (Array.isArray(marketData.valuations) && marketData.valuations.length) {
+    state.valuations = new Map(marketData.valuations.map((item) => [
+      item.symbol,
+      {
+        dividendYield: item.dividendYield,
+        peRatio: item.peRatio,
+        pbRatio: item.pbRatio
+      }
+    ]));
+  } else {
+    await loadValuations(marketData.date);
+  }
+
+  buildDailyRecommendations();
+  await loadHotSprint();
+}
+
+async function loadTwseMarketCatalog() {
+  const text = await fetchText(TWSE_DAILY_URL);
+  const trimmed = text.trim();
+  if (trimmed.startsWith("{")) {
+    const payload = JSON.parse(trimmed);
+    if (payload.stat !== "OK" || !Array.isArray(payload.data)) {
+      throw new Error(payload.stat || "目前無法取得證交所行情");
+    }
+    return normalizeDailyRows(payload.date, payload.data);
+  }
+  return parseDailyCsv(trimmed);
+}
+
+async function loadFallbackMarketCatalog() {
+  const payload = await fetchJson(MARKET_CATALOG_URL);
+  if (!payload.date || !Array.isArray(payload.stocks)) {
+    throw new Error("備援行情資料不可用");
+  }
+  return payload;
+}
+
+function normalizeDailyRows(date, rows) {
+  return {
+    date,
+    stocks: rows
     .filter((row) => /^\d{4}$/.test(row[0]))
     .map((row) => ({
       symbol: row[0],
@@ -153,12 +206,61 @@ async function loadMarketCatalog() {
       close: toNumber(row[7]),
       change: toNumber(row[8]),
       transactions: toNumber(row[9]),
-      date: payload.date
-    }));
+      date
+    }))
+  };
+}
 
-  await loadValuations(payload.date);
-  buildDailyRecommendations();
-  await loadHotSprint();
+function parseDailyCsv(text) {
+  const rows = text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map(parseCsvLine);
+  const dataRows = rows.slice(1);
+  const date = rocCompactDateToKey(dataRows.find((row) => row[0])?.[0]);
+  return {
+    date,
+    stocks: dataRows
+      .filter((row) => /^\d{4}$/.test(row[1]))
+      .map((row) => ({
+        symbol: row[1],
+        name: String(row[2]).replace(/\*+$/, ""),
+        volume: toNumber(row[3]),
+        open: toNumber(row[5]),
+        high: toNumber(row[6]),
+        low: toNumber(row[7]),
+        close: toNumber(row[8]),
+        change: toNumber(row[9]),
+        transactions: toNumber(row[10]),
+        date
+      }))
+  };
+}
+
+function parseCsvLine(line) {
+  const values = [];
+  let current = "";
+  let quoted = false;
+  for (const char of line) {
+    if (char === '"') {
+      quoted = !quoted;
+    } else if (char === "," && !quoted) {
+      values.push(current);
+      current = "";
+    } else {
+      current += char;
+    }
+  }
+  values.push(current);
+  return values.map((value) => value.trim());
+}
+
+function rocCompactDateToKey(value) {
+  const text = String(value || "");
+  if (!/^\d{7}$/.test(text)) return "";
+  const year = Number(text.slice(0, 3)) + 1911;
+  return `${year}${text.slice(3, 5)}${text.slice(5, 7)}`;
 }
 
 async function loadHotSprint() {
