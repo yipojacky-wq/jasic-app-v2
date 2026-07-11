@@ -122,8 +122,13 @@ function formatDate(date) {
   return `${date.slice(0, 4)}/${date.slice(4, 6)}/${date.slice(6, 8)}`;
 }
 
+function withCacheBust(url) {
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}_=${Date.now()}`;
+}
+
 function fetchJson(url) {
-  return fetch(url, { cache: "no-store" }).then((response) => {
+  return fetch(withCacheBust(url)).then((response) => {
     if (!response.ok) throw new Error(`資料服務回應 ${response.status}`);
     return response.json();
   });

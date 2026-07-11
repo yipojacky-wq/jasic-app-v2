@@ -1,4 +1,4 @@
-const CACHE_NAME = "jasic-v2-shell-20260712-refresh23b";
+const CACHE_NAME = "jasic-v2-shell-20260712-ios-fetch";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -34,7 +34,9 @@ self.addEventListener("fetch", (event) => {
     fetch(event.request)
       .then((response) => {
         const copy = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+        caches.open(CACHE_NAME)
+          .then((cache) => cache.put(event.request, copy))
+          .catch(() => undefined);
         return response;
       })
       .catch(() => caches.match(event.request).then((cached) => cached || caches.match("./index.html")))
