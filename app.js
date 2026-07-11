@@ -39,6 +39,7 @@ const elements = {
   empty: document.querySelector("#emptyState"),
   loading: document.querySelector("#loadingState"),
   refresh: document.querySelector("#refreshBtn"),
+  battleRefresh: document.querySelector("#battleRefreshBtn"),
   status: document.querySelector("#updateStatus"),
   filter: document.querySelector("#signalFilter"),
   template: document.querySelector("#stockCardTemplate")
@@ -54,7 +55,8 @@ const recommendationElements = {
 const sprintElements = {
   board: document.querySelector("#sprintBoard"),
   loading: document.querySelector("#sprintLoading"),
-  freshness: document.querySelector("#sprintFreshness")
+  freshness: document.querySelector("#sprintFreshness"),
+  refresh: document.querySelector("#sprintRefreshBtn")
 };
 
 let deferredInstallPrompt = null;
@@ -171,7 +173,7 @@ async function loadHotSprint() {
 function buildSprintRanking() {
   state.sprintRanking = state.sprintFeed.items
     .map((item) => {
-      const market = state.catalog.find((stock) => stock.symbol === item.symbol);
+      const market = getCurrentMarket(item.symbol);
       if (!market || !Number.isFinite(market.close) || !Number.isFinite(item.targetPrice)) return null;
       const gap = item.targetPrice - market.close;
       const upsidePercent = market.close > 0 ? (gap / market.close) * 100 : null;
@@ -182,6 +184,12 @@ function buildSprintRanking() {
     .filter((item) => item && item.gap >= 100)
     .sort((a, b) => b.gap - a.gap)
     .slice(0, 10);
+}
+
+function getCurrentMarket(symbol) {
+  const dailyMarket = state.catalog.find((stock) => stock.symbol === symbol);
+  if (!dailyMarket) return null;
+  return mergeRealtimeQuote(dailyMarket, state.realtimeQuotes.get(symbol));
 }
 
 function getAgeDays(dateString) {
@@ -291,7 +299,7 @@ async function loadValuations(date) {
 }
 
 async function loadRealtimeQuotes() {
-  const symbols = state.watchSymbols.join(",");
+  const symbols = getRealtimeSymbols().join(",");
   const sources = [
     `${WORKER_QUOTES_URL}?symbols=${encodeURIComponent(symbols)}&t=${Date.now()}`,
     `${STATIC_QUOTES_URL}?t=${Date.now()}`
@@ -319,6 +327,13 @@ async function loadRealtimeQuotes() {
   state.realtimeQuotes = new Map();
   state.realtimeGeneratedAt = "";
   state.markets = { taiex: null, taifexNight: null };
+}
+
+function getRealtimeSymbols() {
+  return [...new Set([
+    ...state.watchSymbols,
+    ...state.sprintFeed.items.map((item) => item.symbol).filter(Boolean)
+  ])];
 }
 
 function getMonthKeys(dateString, count = 3) {
@@ -524,6 +539,7 @@ async function refreshAll(options = {}) {
   try {
     await loadMarketCatalog();
     await loadRealtimeQuotes();
+    buildSprintRanking();
     const results = await Promise.allSettled(state.watchSymbols.map(buildStock));
     state.stocks = results
       .filter((result) => result.status === "fulfilled")
@@ -560,6 +576,7 @@ async function refreshRealtimeQuotes() {
 
   try {
     await loadRealtimeQuotes();
+    buildSprintRanking();
     state.stocks = state.stocks.map((stock) => {
       const dailyMarket = state.catalog.find((item) => item.symbol === stock.symbol);
       if (!dailyMarket) return stock;
@@ -582,10 +599,46 @@ async function refreshRealtimeQuotes() {
   }
 }
 
+async function refreshBattleSection() {
+  await refreshAll({ focusSearch: false });
+  document.querySelector("#battleSection")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+async function refreshSprintSection() {
+  if (state.loading) return;
+  setLoading(true);
+  clearError();
+  sprintElements.loading.hidden = false;
+  sprintElements.board.hidden = true;
+
+  try {
+    await loadHotSprint();
+    await loadRealtimeQuotes();
+    buildSprintRanking();
+    const results = await Promise.allSettled(state.watchSymbols.map(buildStock));
+    state.stocks = results
+      .filter((result) => result.status === "fulfilled")
+      .map((result) => result.value);
+    render();
+    const realtimeTimes = state.stocks.map((stock) => stock.quoteTime).filter(Boolean).sort();
+    const latestQuoteTime = realtimeTimes.at(-1);
+    elements.status.textContent = latestQuoteTime
+      ? `今日盤價・最後更新 ${latestQuoteTime}`
+      : "熱門衝刺與自選戰情已更新";
+  } catch (error) {
+    showError(`熱門衝刺更新失敗：${error.message}`);
+  } finally {
+    setLoading(false);
+    document.querySelector("#sprintSection")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
+
 function setLoading(loading) {
   state.loading = loading;
   elements.refresh.classList.toggle("is-loading", loading);
   elements.refresh.disabled = loading;
+  elements.battleRefresh.disabled = loading;
+  sprintElements.refresh.disabled = loading;
   elements.loading.hidden = !loading || state.watchSymbols.length === 0;
   if (loading && state.watchSymbols.length > 0) elements.empty.hidden = true;
   recommendationElements.loading.hidden = !loading;
@@ -1111,6 +1164,8 @@ document.querySelector(".quick-picks").addEventListener("click", (event) => {
 });
 
 elements.refresh.addEventListener("click", () => refreshAll());
+elements.battleRefresh.addEventListener("click", () => refreshBattleSection());
+sprintElements.refresh.addEventListener("click", () => refreshSprintSection());
 
 elements.filter.addEventListener("change", () => {
   state.filter = elements.filter.value;

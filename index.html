@@ -190,12 +190,15 @@
           <span class="eyebrow">我的戰情清單</span>
           <h2 id="watchTitle">自選股戰情看板</h2>
         </div>
-        <select id="signalFilter" aria-label="篩選觀測訊號">
-          <option value="all">全部訊號</option>
-          <option value="buy">買進觀察</option>
-          <option value="hold">可持有</option>
-          <option value="sell">拋售警示</option>
-        </select>
+        <div class="section-actions">
+          <button id="battleRefreshBtn" class="section-refresh-button" type="button">更新自選戰情</button>
+          <select id="signalFilter" aria-label="篩選觀測訊號">
+            <option value="all">全部訊號</option>
+            <option value="buy">買進觀察</option>
+            <option value="hold">可持有</option>
+            <option value="sell">拋售警示</option>
+          </select>
+        </div>
       </div>
 
       <div id="loadingState" class="loading-state" hidden>
@@ -226,7 +229,10 @@
           <h2 id="sprintTitle">熱門衝刺建議區</h2>
           <p>彙整可追溯的外資／券商目標價消息，只顯示目標價高於最新股價至少 100 元的股票，依潛在價差排序前十名。</p>
         </div>
-        <span id="sprintFreshness" class="freshness-badge">載入消息資料中…</span>
+        <div class="section-actions sprint-actions">
+          <span id="sprintFreshness" class="freshness-badge">載入消息資料中…</span>
+          <button id="sprintRefreshBtn" class="section-refresh-button sprint-refresh-button" type="button">更新熱門衝刺</button>
+        </div>
       </div>
       <div class="sprint-warning">
         <strong>重要提示</strong>
